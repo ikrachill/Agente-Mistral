@@ -336,3 +336,61 @@ print(f"   → [OK] Parquet Motor: steam_processed_dataset.parquet")
 print(f"   → [OK] CSV Backup: steam_processed_dataset.csv")
 print(f"   → [OK] Auditoría Logs: steam_processed_dataset_logs.json")
 
+"""# ETAPA 6: GENERACIÓN DEL REPORTE VISUAL"""
+
+print("\n" + "■" * 70)
+print("📊 COMPILANDO DASHBOARD DE CONTROL GRÁFICO")
+print("■" * 70 + "\n")
+
+plt.style.use('seaborn-v0_8-darkgrid')
+
+lienzo, ((panel1, panel2), (panel3, panel4)) = plt.subplots(2, 2, figsize=(16, 11))
+lienzo.suptitle('📊 DASHBOARD DE RENDIMIENTO - INFRAESTRUCTURA STEAM', fontsize=16, fontweight='bold', color='#1a2530')
+
+# Subplot 1: Precios de venta base
+precios_filtrados = datos_depurados[datos_depurados['precio_base'] < 100]['precio_base'].dropna()
+panel1.hist(precios_filtrados, bins=40, edgecolor='#0f171e', alpha=0.8, color='#1f77b4')
+panel1.set_title('💰 Distribución Comercial de Precios (< $100)', fontsize=12, fontweight='bold')
+panel1.set_xlabel('Valor de Venta Comercial (USD)')
+panel1.set_ylabel('Frecuencia Absoluta')
+panel1.axvline(precios_filtrados.median(), color='#d62728', linestyle='--', linewidth=2, label=f'Mediana: ${precios_filtrados.median():.2f}')
+panel1.legend()
+
+# Subplot 2: Target (Score)
+if 'score_final' in datos_depurados.columns:
+    panel2.hist(datos_depurados['score_final'].dropna(), bins=30, edgecolor='#0f171e', alpha=0.8, color='#2ca02c')
+    panel2.set_title('⭐ Comportamiento del Score Ponderado', fontsize=12, fontweight='bold')
+    panel2.set_xlabel('Índice Escalado Normalizado (0-100)')
+    panel2.set_ylabel('Densidad de Registros')
+
+# Subplot 3: Lanzamientos temporales anuales
+conteo_temporal = datos_depurados['año_publicacion'].value_counts().sort_index()
+conteo_temporal_filtrado = conteo_temporal[conteo_temporal.index >= 1995]
+panel3.bar(conteo_temporal_filtrado.index, conteo_temporal_filtrado.values, alpha=0.8, color='#ff7f0e', edgecolor='#0f171e')
+panel3.set_title('📅 Histórico de Lanzamientos Anuales', fontsize=12, fontweight='bold')
+panel3.set_xlabel('Año Registrado')
+panel3.set_ylabel('Volumen de Publicaciones')
+panel3.set_xticks(conteo_temporal_filtrado.index[::2])
+panel3.tick_params(axis='x', rotation=45)
+
+# Subplot 4: Distribución de las 10 categorías de géneros dominantes
+if 'genre_coleccion' in datos_depurados.columns:
+    lista_maestra_generos = []
+    for sublista in datos_depurados['genre_coleccion'].dropna():
+        lista_maestra_generos.extend(sublista)
+
+    frecuencia_generos = dict(Counter(lista_maestra_generos).most_common(10))
+    paleta_colores = plt.cm.GnBu(np.linspace(0.4, 0.9, 10))
+    panel4.barh(list(frecuencia_generos.keys()), list(frecuencia_generos.values()), color=paleta_colores, edgecolor='#0f171e')
+    panel4.set_title('🎮 Frecuencia de los Top 10 Géneros', fontsize=12, fontweight='bold')
+    panel4.set_xlabel('Presencia Mapeada en Dataset')
+    panel4.invert_yaxis()
+
+plt.tight_layout()
+plt.savefig(PATH_RAIZ + 'analytics_dashboard.png', dpi=150, bbox_inches='tight')
+plt.show()
+
+print(f"✅ Imagen del reporte gráfico guardada en: {PATH_RAIZ}analytics_dashboard.png")
+print("\n" + "■" * 70)
+print("🎉 ¡SISTEMA OPERATIVO FINALIZADO INTEGRALMENTE!")
+print("■" * 70 + "\n")
