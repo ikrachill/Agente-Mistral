@@ -43,3 +43,32 @@ print(f"📋 Primeros campos: {', '.join(df_origen.columns[:5])}...")
 print("\n👀 Inspección inicial de registros:")
 display(df_origen.head())
 
+"""# ETAPA 2: AUDITORÍA DE CALIDAD (EDA)"""
+
+print("\n" + "■" * 70)
+print("🔍 EVALUANDO INTEGRIDAD E INCONSISTENCIAS DE LOS DATOS")
+print("■" * 70 + "\n")
+
+def mapear_integridad_datos(dataframe):
+    """Inspecciona y reporta el estado estructural de la información"""
+    print("📋 1. RESUMEN DE TIPOS")
+    print(f"   → {dict(dataframe.dtypes.value_counts())}\n")
+
+    print("⚠️ 2. ANÁLISIS DE VACÍOS (Top 5)")
+    conteo_nulos = dataframe.isnull().sum()
+    porcentaje_nulos = (conteo_nulos / len(dataframe)) * 100
+    resumen_vacios = pd.DataFrame({'Total_Vacios': conteo_nulos, 'Porcentaje_%': porcentaje_nulos})
+    print(resumen_vacios[resumen_vacios['Total_Vacios'] > 0].sort_values('Total_Vacios', ascending=False).head(5).to_string())
+
+    print("\n📊 3. MÉTRICAS VARIABLES NUMÉRICAS")
+    print(dataframe.describe().to_string())
+
+    print("\n🧪 4. MUESTRA DE DATOS COMPLEJOS")
+    columnas_clave = ['original_price', 'recent_reviews', 'release_date', 'genre']
+    for col in columnas_clave:
+        if col in dataframe.columns:
+            print(f"\n   → Muestra en {col}:")
+            print(f"      {dataframe[col].dropna().head(3).tolist()}")
+
+mapear_integridad_datos(df_origen)
+
