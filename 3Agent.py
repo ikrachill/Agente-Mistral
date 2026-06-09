@@ -282,3 +282,38 @@ class SteamDataProcessor:
             json.dump(self.registro_operaciones, archivo, indent=2)
         return self
 
+"""# ETAPA 4: PROCESAMIENTO ACTIVO"""
+
+print("■" * 70)
+print("⚙️  INICIANDO PIPELINE DE FLUJO DE DATOS")
+print("■" * 70 + "\n")
+
+# Instancia del procesador alternativo
+procesador_sistema = SteamDataProcessor(df_origen)
+
+# Encadenamiento estructurado del flujo
+procesador_sistema \
+    .limpiar_precios_base() \
+    .segmentar_opiniones() \
+    .estructurar_lineas_temporales() \
+    .deserializar_arreglos('genre') \
+    .deserializar_arreglos('popular_tags') \
+    .deserializar_arreglos('languages') \
+    .imputar_valores_faltantes() \
+    .definir_variable_target()
+
+# Desempaquetado de objetos limpios
+datos_depurados, logs_auditoria = procesador_sistema.empaquetar_datos()
+
+print("\n" + "■" * 70)
+print("✨ FLUJO DE DATOS EJECUTADO CON ÉXITO")
+print("■" * 70)
+print(f"\n📊 Sumario operativo:")
+print(f"   → Filas limpias obtenidas: {len(datos_depurados):,}")
+print(f"   → Columnas generadas del motor: {len(datos_depurados.columns)}")
+print(f"   → Operaciones en cola resueltas: {len(logs_auditoria)}")
+print(f"   → Peso asignado en memoria RAM: {datos_depurados.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
+
+print("\n👀 Datos procesados resultantes:")
+display(datos_depurados.head())
+
