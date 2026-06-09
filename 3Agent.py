@@ -317,3 +317,22 @@ print(f"   → Peso asignado en memoria RAM: {datos_depurados.memory_usage(deep=
 print("\n👀 Datos procesados resultantes:")
 display(datos_depurados.head())
 
+"""# ETAPA 5: ALMACENAMIENTO DE SEGURIDAD"""
+
+print("\n" + "■" * 70)
+print("💾 ALMACENANDO EN UNIDADES DE DRIVE")
+print("■" * 70 + "\n")
+
+PATH_RAIZ = '/content/drive/MyDrive/steam_analytics_system/'
+destino_parquet = PATH_RAIZ + 'steam_processed_dataset.parquet'
+destino_csv = PATH_RAIZ + 'steam_processed_dataset.csv'
+
+# Guardado físico en disco
+procesador_sistema.exportar_al_disco(destino_parquet)
+datos_depurados.to_csv(destino_csv, index=False)
+
+print(f"\n📁 Rutas de almacenamiento del sistema: {PATH_RAIZ}")
+print(f"   → [OK] Parquet Motor: steam_processed_dataset.parquet")
+print(f"   → [OK] CSV Backup: steam_processed_dataset.csv")
+print(f"   → [OK] Auditoría Logs: steam_processed_dataset_logs.json")
+
