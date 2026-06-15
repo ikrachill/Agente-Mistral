@@ -176,3 +176,28 @@ class AgenteNormalizador:
 # Ejecutar Agente 1
 agente1 = AgenteNormalizador(df_original, n_muestra=N_MUESTRA_DATASET)
 dataset_limpio = agente1.ejecutar()
+
+"""BLOQUE 6: PREPARAR DATOS PARA MODELOS"""
+
+X = dataset_limpio["CleanedReview"].values
+y = dataset_limpio["Sentiment"].values
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y
+)
+
+print(f"📊 Datos de entrenamiento: {len(X_train)}")
+print(f"📊 Datos de prueba: {len(X_test)}")
+
+# Tokenización para LSTM
+tokenizer = Tokenizer(num_words=MAX_PALABRAS, oov_token='<OOV>')
+tokenizer.fit_on_texts(X_train)
+
+X_train_seq = tokenizer.texts_to_sequences(X_train)
+X_test_seq = tokenizer.texts_to_sequences(X_test)
+
+X_train_pad = pad_sequences(X_train_seq, maxlen=MAX_LONGITUD, padding='post', truncating='post')
+X_test_pad = pad_sequences(X_test_seq, maxlen=MAX_LONGITUD, padding='post', truncating='post')
+
+print(f"✅ Embeddings configurados")
+print(f"   Vocabulario tamaño: {len(tokenizer.word_index)}")
