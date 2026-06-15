@@ -56,7 +56,7 @@ from langchain_mistralai import ChatMistralAI
 
 from google.colab import userdata
 
-print("✅ Importaciones completadas")
+print(" Importaciones completadas")
 
 """BLOQUE 3: CONFIGURACIÓN INICIAL"""
 
@@ -91,7 +91,7 @@ with zipfile.ZipFile("amazon-fine-food-reviews.zip", "r") as zip_ref:
     zip_ref.extractall("amazon_reviews")
 
 df_original = pd.read_csv("amazon_reviews/Reviews.csv")
-print(f"✅ Dataset cargado: {df_original.shape[0]} filas, {df_original.shape[1]} columnas")
+print(f" Dataset cargado: {df_original.shape[0]} filas, {df_original.shape[1]} columnas")
 print(df_original.head())
 
 """BLOQUE 5: AGENTE 1 - NORMALIZADOR (limpieza de datos)"""
@@ -115,18 +115,18 @@ class AgenteNormalizador:
 
     def ejecutar(self):
         print("\n" + "="*50)
-        print("🤖 AGENTE 1: NORMALIZADOR")
+        print(" AGENTE 1: NORMALIZADOR")
         print("="*50)
 
         # Reducir muestra
         if len(self.df) > self.n_muestra:
             self.df = self.df.sample(n=self.n_muestra, random_state=RANDOM_STATE)
-            print(f"📊 Muestra reducida a: {self.df.shape}")
+            print(f" Muestra reducida a: {self.df.shape}")
 
         # Eliminar duplicados
         antes = len(self.df)
         self.df = self.df.drop_duplicates()
-        print(f"🗑️ Duplicados eliminados: {antes - len(self.df)}")
+        print(f" Duplicados eliminados: {antes - len(self.df)}")
 
         # Manejar valores nulos
         self.df["Summary"] = self.df["Summary"].fillna("")
@@ -155,7 +155,7 @@ class AgenteNormalizador:
             negativos.sample(n=n_min, random_state=RANDOM_STATE)
         ]).sample(frac=1, random_state=RANDOM_STATE).reset_index(drop=True)
 
-        print(f"\n✅ Dataset balanceado: {self.df_balanceado.shape}")
+        print(f"\n Dataset balanceado: {self.df_balanceado.shape}")
         print(f"   Positivos: {len(self.df_balanceado[self.df_balanceado['Sentiment']==1])}")
         print(f"   Negativos: {len(self.df_balanceado[self.df_balanceado['Sentiment']==0])}")
 
@@ -186,8 +186,8 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y
 )
 
-print(f"📊 Datos de entrenamiento: {len(X_train)}")
-print(f"📊 Datos de prueba: {len(X_test)}")
+print(f" Datos de entrenamiento: {len(X_train)}")
+print(f" Datos de prueba: {len(X_test)}")
 
 # Tokenización para LSTM
 tokenizer = Tokenizer(num_words=MAX_PALABRAS, oov_token='<OOV>')
@@ -199,7 +199,7 @@ X_test_seq = tokenizer.texts_to_sequences(X_test)
 X_train_pad = pad_sequences(X_train_seq, maxlen=MAX_LONGITUD, padding='post', truncating='post')
 X_test_pad = pad_sequences(X_test_seq, maxlen=MAX_LONGITUD, padding='post', truncating='post')
 
-print(f"✅ Embeddings configurados")
+print(f" Embeddings configurados")
 print(f"   Vocabulario tamaño: {len(tokenizer.word_index)}")
 
 """BLOQUE 7: AGENTE 2 - COMPARAR MODELOS Y ELEGIR EL MEJOR"""
@@ -217,7 +217,7 @@ class AgenteComparador:
         self.mejor_f1 = 0
 
     def modelo_regresion_logistica(self):
-        print("\n📊 [1/3] REGRESIÓN LOGÍSTICA...")
+        print("\n [1/3] REGRESIÓN LOGÍSTICA...")
         vectorizer = TfidfVectorizer(max_features=5000)
         X_train_vec = vectorizer.fit_transform(self.X_train)
         X_test_vec = vectorizer.transform(self.X_test)
@@ -237,7 +237,7 @@ class AgenteComparador:
         return metricas
 
     def modelo_lstm(self):
-        print("\n🧠 [2/3] LSTM...")
+        print("\n [2/3] LSTM...")
         model = Sequential([
             Embedding(MAX_PALABRAS, 128, input_length=MAX_LONGITUD),
             LSTM(64, dropout=0.2),
@@ -262,7 +262,7 @@ class AgenteComparador:
         return metricas
 
     def modelo_distilbert(self):
-        print("\n🤖 [3/3] DISTILBERT...")
+        print("\n [3/3] DISTILBERT...")
         clasificador = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
 
         n_muestra = min(100, len(self.X_test))
@@ -289,12 +289,12 @@ class AgenteComparador:
         return metricas
 
     def comparar_y_seleccionar(self):
-        print("\n🏆 COMPARANDO MODELOS...")
+        print("\n COMPARANDO MODELOS...")
         self.modelo_regresion_logistica()
         self.modelo_lstm()
         self.modelo_distilbert()
 
-        print("\n📊 TABLA COMPARATIVA:")
+        print("\n TABLA COMPARATIVA:")
         print("-" * 60)
         print(f"{'Modelo':<20} {'Accuracy':<12} {'F1-Score':<12}")
         print("-" * 60)
@@ -308,7 +308,7 @@ class AgenteComparador:
                 self.mejores_metricas = m
 
         print("-" * 60)
-        print(f"\n🏆 MEJOR MODELO: {self.mejor_nombre} (F1={self.mejor_f1:.4f})")
+        print(f"\n  MEJOR MODELO: {self.mejor_nombre} (F1={self.mejor_f1:.4f})")
         return self.mejor_nombre, self.mejores_metricas
 
 # Ejecutar Agente 2
@@ -318,7 +318,7 @@ mejor_modelo, mejores_metricas = agente2.comparar_y_seleccionar()
 """BLOQUE 8: CREAR CORPUS PARA RAG"""
 
 print("\n" + "="*50)
-print("📚 CREANDO CORPUS PARA RAG")
+print(" CREANDO CORPUS PARA RAG")
 print("="*50)
 
 # Crear corpus
@@ -354,16 +354,16 @@ def recuperar_contexto(pregunta, k=3):
     resultados = collection.query(query_embeddings=[pregunta_emb.tolist()], n_results=k)
     return resultados['documents'][0]
 
-print(f"✅ Corpus: {len(corpus)} documentos")
-print(f"✅ Embeddings: {len(embeddings_list)} vectores")
-print(f"✅ ChromaDB: {collection.count()} documentos almacenados")
+print(f" Corpus: {len(corpus)} documentos")
+print(f" Embeddings: {len(embeddings_list)} vectores")
+print(f" ChromaDB: {collection.count()} documentos almacenados")
 
 """BLOQUE 9: CONFIGURAR MISTRAL"""
 
 MISTRAL_API_KEY = userdata.get("MISTRAL_API_KEY")
 
 if not MISTRAL_API_KEY:
-    raise ValueError("❌ No se encontró MISTRAL_API_KEY")
+    raise ValueError(" No se encontró MISTRAL_API_KEY")
 
 llm = ChatMistralAI(
     api_key=MISTRAL_API_KEY,
@@ -371,7 +371,7 @@ llm = ChatMistralAI(
     temperature=0.3
 )
 
-print("✅ Mistral configurado")
+print(" Mistral configurado")
 
 """BLOQUE 10: AGENTE 3 - COMUNICADOR (RAG + MISTRAL)"""
 
@@ -448,33 +448,33 @@ agente3 = AgenteComunicador(recuperar_contexto, llm, mejores_metricas, dataset_l
 
 # Cargar el clasificador DistilBERT para uso interactivo
 print("\n" + "="*50)
-print("🎯 EJECUCIÓN FINAL DEL SISTEMA")
+print(" EJECUCIÓN FINAL DEL SISTEMA")
 print("="*50)
 
 # Generar y mostrar reporte final
-print("\n📋 REPORTE FINAL:")
+print("\n REPORTE FINAL:")
 print(agente3.generar_reporte())
 
 # Cargar clasificador de sentimientos (DistilBERT)
-print("\n🔄 Cargando clasificador de sentimientos DistilBERT...")
+print("\n Cargando clasificador de sentimientos DistilBERT...")
 from transformers import pipeline
 clasificador_sentimientos = pipeline(
     "sentiment-analysis",
     model="distilbert-base-uncased-finetuned-sst-2-english"
 )
-print("✅ Clasificador de sentimientos listo")
+print(" Clasificador de sentimientos listo")
 
 # Menú interactivo
 print("\n" + "="*50)
-print("💬 SISTEMA COMPLETO: RAG + CLASIFICADOR + MISTRAL")
+print(" SISTEMA COMPLETO: RAG + CLASIFICADOR + MISTRAL")
 print("="*50)
 
 while True:
     print("\n" + "-"*50)
     print("OPCIONES:")
-    print("1. 🔍 Hacer una pregunta sobre el dataset (RAG + Mistral)")
-    print("2. 😊 Clasificar sentimiento de una reseña (DistilBERT)")
-    print("3. 📝 Ver preguntas de ejemplo")
+    print("1.  Hacer una pregunta sobre el dataset (RAG + Mistral)")
+    print("2.  Clasificar sentimiento de una reseña (DistilBERT)")
+    print("3. Ver preguntas de ejemplo")
     print("4. ❌ Salir")
     print("-"*50)
 
@@ -482,44 +482,44 @@ while True:
 
     if opcion == "1":
         pregunta = input("\n🔍 Escribe tu pregunta sobre el dataset: ")
-        print("\n🤔 Procesando tu pregunta con RAG + Mistral...")
+        print("\n Procesando tu pregunta con RAG + Mistral...")
         respuesta = agente3.responder_pregunta(pregunta)
-        print(f"\n💡 RESPUESTA: {respuesta}")
+        print(f"\n RESPUESTA: {respuesta}")
 
     elif opcion == "2":
-        print("\n😊 CLASIFICADOR DE SENTIMIENTOS (DistilBERT)")
+        print("\n CLASIFICADOR DE SENTIMIENTOS (DistilBERT)")
         print("   El clasificador analizará tu texto y dirá si es POSITIVO o NEGATIVO.")
         print("   Ejemplos: 'I love this product' → POSITIVO")
         print("             'This is terrible' → NEGATIVO")
 
-        texto = input("\n📝 Ingresa una reseña en inglés para clasificar: ")
+        texto = input("\n Ingresa una reseña en inglés para clasificar: ")
 
         if texto.strip():
-            print("\n🔄 Analizando sentimiento...")
+            print("\n Analizando sentimiento...")
             try:
                 resultado = clasificador_sentimientos(texto[:512])[0]
                 sentimiento = resultado["label"]
                 confianza = resultado["score"] * 100
 
                 print("\n" + "="*40)
-                print("📊 RESULTADO DEL CLASIFICADOR:")
+                print(" RESULTADO DEL CLASIFICADOR:")
                 print(f"   Texto: {texto[:100]}...")
                 print(f"   Sentimiento: {sentimiento}")
                 print(f"   Confianza: {confianza:.2f}%")
 
                 # Emoji según resultado
                 if sentimiento == "POSITIVE":
-                    print("   👍 La reseña es POSITIVA")
+                    print("    La reseña es POSITIVA")
                 else:
-                    print("   👎 La reseña es NEGATIVA")
+                    print("    La reseña es NEGATIVA")
                 print("="*40)
             except Exception as e:
-                print(f"❌ Error al clasificar: {e}")
+                print(f" Error al clasificar: {e}")
         else:
-            print("❌ No ingresaste ningún texto.")
+            print(" No ingresaste ningún texto.")
 
     elif opcion == "3":
-        print("\n📝 PREGUNTAS DE EJEMPLO para RAG:")
+        print("\n PREGUNTAS DE EJEMPLO para RAG:")
         print("   - ¿Cuántas reseñas hay en el dataset?")
         print("   - ¿Cuál es el accuracy del mejor modelo?")
         print("   - ¿Qué dicen los clientes sobre la calidad del producto?")
@@ -527,16 +527,16 @@ while True:
         print("   - ¿Cuál es el F1-Score del modelo seleccionado?")
         print("   - ¿Los clientes recomiendan el producto?")
 
-        print("\n📝 EJEMPLOS para el CLASIFICADOR DE SENTIMIENTOS:")
+        print("\n EJEMPLOS para el CLASIFICADOR DE SENTIMIENTOS:")
         print("   - 'This product is amazing! I love it!' → POSITIVO")
         print("   - 'The quality is terrible, I regret buying it' → NEGATIVO")
         print("   - 'Good value for money, I recommend it' → POSITIVO")
         print("   - 'The package arrived damaged and the product was stale' → NEGATIVO")
 
     elif opcion == "4":
-        print("\n👋 ¡Gracias por usar el sistema de agentes!")
-        print("✅ PROYECTO COMPLETADO")
+        print("\n ¡Gracias por usar el sistema de agentes!")
+        print(" PROYECTO COMPLETADO")
         break
 
     else:
-        print("\n❌ Opción no válida. Por favor elige 1, 2, 3 o 4.")
+        print("\n Opción no válida. Por favor elige 1, 2, 3 o 4.")
