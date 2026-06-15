@@ -357,3 +357,87 @@ def recuperar_contexto(pregunta, k=3):
 print(f"✅ Corpus: {len(corpus)} documentos")
 print(f"✅ Embeddings: {len(embeddings_list)} vectores")
 print(f"✅ ChromaDB: {collection.count()} documentos almacenados")
+
+"""BLOQUE 9: CONFIGURAR MISTRAL"""
+
+MISTRAL_API_KEY = userdata.get("MISTRAL_API_KEY")
+
+if not MISTRAL_API_KEY:
+    raise ValueError("❌ No se encontró MISTRAL_API_KEY")
+
+llm = ChatMistralAI(
+    api_key=MISTRAL_API_KEY,
+    model="mistral-small-latest",
+    temperature=0.3
+)
+
+print("✅ Mistral configurado")
+
+"""BLOQUE 10: AGENTE 3 - COMUNICADOR (RAG + MISTRAL)"""
+
+class AgenteComunicador:
+    def __init__(self, recuperar_func, llm, metricas, dataset, nombre_modelo):
+        self.recuperar_contexto = recuperar_func
+        self.llm = llm
+        self.metricas = metricas
+        self.dataset = dataset
+        self.nombre_modelo = nombre_modelo
+
+    def responder_pregunta(self, pregunta):
+        pregunta_lower = pregunta.lower()
+
+        # Estadísticas del dataset
+        if "cuantas" in pregunta_lower or "cuántas" in pregunta_lower:
+            total = len(self.dataset)
+            positivos = len(self.dataset[self.dataset["Sentiment"] == 1])
+            negativos = len(self.dataset[self.dataset["Sentiment"] == 0])
+            return f"El dataset contiene {total} reseñas. {positivos} son positivas y {negativos} son negativas."
+
+        # Métricas del mejor modelo
+        if "accuracy" in pregunta_lower or "f1" in pregunta_lower:
+            return f"Mejor modelo: {self.nombre_modelo} | Accuracy={self.metricas['accuracy']:.4f} | F1={self.metricas['f1']:.4f}"
+
+        # RAG
+        contexto = self.recuperar_contexto(pregunta)
+        texto_contexto = "\n\n".join(contexto)
+
+        prompt = f"""Eres un asistente. Usa SOLO el contexto. Responde en español de forma breve.
+
+Pregunta: {pregunta}
+Contexto: {texto_contexto}
+Respuesta:"""
+
+        respuesta = self.llm.invoke(prompt)
+        return respuesta.content
+
+    def generar_reporte(self):
+        total = len(self.dataset)
+        positivos = len(self.dataset[self.dataset["Sentiment"] == 1])
+        negativos = len(self.dataset[self.dataset["Sentiment"] == 0])
+
+        return f"""
+========================================
+REPORTE FINAL DEL PROYECTO
+========================================
+
+1. DATASET
+   - Total de reseñas: {total}
+   - Reseñas positivas: {positivos}
+   - Reseñas negativas: {negativos}
+   - Dataset balanceado
+
+2. MEJOR MODELO SELECCIONADO
+   - Modelo: {self.nombre_modelo}
+   - Accuracy: {self.metricas['accuracy']:.4f}
+   - Precision: {self.metricas['precision']:.4f}
+   - Recall: {self.metricas['recall']:.4f}
+   - F1-Score: {self.metricas['f1']:.4f}
+
+3. AGENTES IMPLEMENTADOS
+   - Agente 1: Normalización de datos
+   - Agente 2: Comparación de 3 modelos (RL, LSTM, DistilBERT)
+   - Agente 3: Comunicador con RAG y Mistral
+"""
+
+# Ejecutar Agente 3
+agente3 = AgenteComunicador(recuperar_contexto, llm, mejores_metricas, dataset_limpio, mejor_modelo)
