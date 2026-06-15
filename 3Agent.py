@@ -441,3 +441,102 @@ REPORTE FINAL DEL PROYECTO
 
 # Ejecutar Agente 3
 agente3 = AgenteComunicador(recuperar_contexto, llm, mejores_metricas, dataset_limpio, mejor_modelo)
+
+"""BLOQUE 11: EJECUCIÓN FINAL
+
+"""
+
+# Cargar el clasificador DistilBERT para uso interactivo
+print("\n" + "="*50)
+print("🎯 EJECUCIÓN FINAL DEL SISTEMA")
+print("="*50)
+
+# Generar y mostrar reporte final
+print("\n📋 REPORTE FINAL:")
+print(agente3.generar_reporte())
+
+# Cargar clasificador de sentimientos (DistilBERT)
+print("\n🔄 Cargando clasificador de sentimientos DistilBERT...")
+from transformers import pipeline
+clasificador_sentimientos = pipeline(
+    "sentiment-analysis",
+    model="distilbert-base-uncased-finetuned-sst-2-english"
+)
+print("✅ Clasificador de sentimientos listo")
+
+# Menú interactivo
+print("\n" + "="*50)
+print("💬 SISTEMA COMPLETO: RAG + CLASIFICADOR + MISTRAL")
+print("="*50)
+
+while True:
+    print("\n" + "-"*50)
+    print("OPCIONES:")
+    print("1. 🔍 Hacer una pregunta sobre el dataset (RAG + Mistral)")
+    print("2. 😊 Clasificar sentimiento de una reseña (DistilBERT)")
+    print("3. 📝 Ver preguntas de ejemplo")
+    print("4. ❌ Salir")
+    print("-"*50)
+
+    opcion = input("\nSelecciona una opción (1, 2, 3 o 4): ")
+
+    if opcion == "1":
+        pregunta = input("\n🔍 Escribe tu pregunta sobre el dataset: ")
+        print("\n🤔 Procesando tu pregunta con RAG + Mistral...")
+        respuesta = agente3.responder_pregunta(pregunta)
+        print(f"\n💡 RESPUESTA: {respuesta}")
+
+    elif opcion == "2":
+        print("\n😊 CLASIFICADOR DE SENTIMIENTOS (DistilBERT)")
+        print("   El clasificador analizará tu texto y dirá si es POSITIVO o NEGATIVO.")
+        print("   Ejemplos: 'I love this product' → POSITIVO")
+        print("             'This is terrible' → NEGATIVO")
+
+        texto = input("\n📝 Ingresa una reseña en inglés para clasificar: ")
+
+        if texto.strip():
+            print("\n🔄 Analizando sentimiento...")
+            try:
+                resultado = clasificador_sentimientos(texto[:512])[0]
+                sentimiento = resultado["label"]
+                confianza = resultado["score"] * 100
+
+                print("\n" + "="*40)
+                print("📊 RESULTADO DEL CLASIFICADOR:")
+                print(f"   Texto: {texto[:100]}...")
+                print(f"   Sentimiento: {sentimiento}")
+                print(f"   Confianza: {confianza:.2f}%")
+
+                # Emoji según resultado
+                if sentimiento == "POSITIVE":
+                    print("   👍 La reseña es POSITIVA")
+                else:
+                    print("   👎 La reseña es NEGATIVA")
+                print("="*40)
+            except Exception as e:
+                print(f"❌ Error al clasificar: {e}")
+        else:
+            print("❌ No ingresaste ningún texto.")
+
+    elif opcion == "3":
+        print("\n📝 PREGUNTAS DE EJEMPLO para RAG:")
+        print("   - ¿Cuántas reseñas hay en el dataset?")
+        print("   - ¿Cuál es el accuracy del mejor modelo?")
+        print("   - ¿Qué dicen los clientes sobre la calidad del producto?")
+        print("   - ¿Qué opinan los clientes del sabor?")
+        print("   - ¿Cuál es el F1-Score del modelo seleccionado?")
+        print("   - ¿Los clientes recomiendan el producto?")
+
+        print("\n📝 EJEMPLOS para el CLASIFICADOR DE SENTIMIENTOS:")
+        print("   - 'This product is amazing! I love it!' → POSITIVO")
+        print("   - 'The quality is terrible, I regret buying it' → NEGATIVO")
+        print("   - 'Good value for money, I recommend it' → POSITIVO")
+        print("   - 'The package arrived damaged and the product was stale' → NEGATIVO")
+
+    elif opcion == "4":
+        print("\n👋 ¡Gracias por usar el sistema de agentes!")
+        print("✅ PROYECTO COMPLETADO")
+        break
+
+    else:
+        print("\n❌ Opción no válida. Por favor elige 1, 2, 3 o 4.")
