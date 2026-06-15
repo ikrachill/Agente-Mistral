@@ -93,3 +93,86 @@ with zipfile.ZipFile("amazon-fine-food-reviews.zip", "r") as zip_ref:
 df_original = pd.read_csv("amazon_reviews/Reviews.csv")
 print(f"✅ Dataset cargado: {df_original.shape[0]} filas, {df_original.shape[1]} columnas")
 print(df_original.head())
+
+"""BLOQUE 5: AGENTE 1 - NORMALIZADOR (limpieza de datos)"""
+
+class AgenteNormalizador:
+    """Agente 1: Limpieza y normalización de datos"""
+
+    def __init__(self, dataframe, n_muestra=10000):
+        self.df = dataframe.copy()
+        self.n_muestra = n_muestra
+
+    def limpiar_texto(self, texto):
+        """Limpieza básica de texto"""
+        if not isinstance(texto, str):
+            return ""
+        texto = texto.lower()
+        texto = re.sub(r'\d+', '', texto)
+        texto = re.sub(r'[^\w\s]', '', texto)
+        texto = re.sub(r'\s+', ' ', texto).strip()
+        return texto
+
+    def ejecutar(self):
+        print("\n" + "="*50)
+        print("🤖 AGENTE 1: NORMALIZADOR")
+        print("="*50)
+
+        # Reducir muestra
+        if len(self.df) > self.n_muestra:
+            self.df = self.df.sample(n=self.n_muestra, random_state=RANDOM_STATE)
+            print(f"📊 Muestra reducida a: {self.df.shape}")
+
+        # Eliminar duplicados
+        antes = len(self.df)
+        self.df = self.df.drop_duplicates()
+        print(f"🗑️ Duplicados eliminados: {antes - len(self.df)}")
+
+        # Manejar valores nulos
+        self.df["Summary"] = self.df["Summary"].fillna("")
+        self.df["Text"] = self.df["Text"].fillna("")
+
+        # Crear reseña completa
+        self.df["FullReview"] = self.df["Summary"] + ". " + self.df["Text"]
+
+        # Limpiar texto
+        self.df["CleanedReview"] = self.df["FullReview"].apply(self.limpiar_texto)
+
+        # Eliminar reseñas vacías
+        self.df = self.df[self.df["CleanedReview"].str.strip() != ""]
+
+        # Crear target (Score 1-2=negativo, 4-5=positivo, eliminar 3)
+        self.df = self.df[self.df["Score"] != 3]
+        self.df["Sentiment"] = self.df["Score"].apply(lambda x: 1 if x >= 4 else 0)
+
+        # Balancear clases
+        positivos = self.df[self.df["Sentiment"] == 1]
+        negativos = self.df[self.df["Sentiment"] == 0]
+        n_min = min(len(positivos), len(negativos))
+
+        self.df_balanceado = pd.concat([
+            positivos.sample(n=n_min, random_state=RANDOM_STATE),
+            negativos.sample(n=n_min, random_state=RANDOM_STATE)
+        ]).sample(frac=1, random_state=RANDOM_STATE).reset_index(drop=True)
+
+        print(f"\n✅ Dataset balanceado: {self.df_balanceado.shape}")
+        print(f"   Positivos: {len(self.df_balanceado[self.df_balanceado['Sentiment']==1])}")
+        print(f"   Negativos: {len(self.df_balanceado[self.df_balanceado['Sentiment']==0])}")
+
+        # Visualización
+        plt.figure(figsize=(10, 4))
+        plt.subplot(1, 2, 1)
+        sns.countplot(data=self.df_balanceado, x="Sentiment")
+        plt.title("Distribución de Sentimientos")
+        plt.xticks([0, 1], ["NEGATIVO", "POSITIVO"])
+
+        plt.subplot(1, 2, 2)
+        sns.countplot(data=self.df_balanceado, x="Score")
+        plt.title("Distribución de Puntuaciones")
+        plt.show()
+
+        return self.df_balanceado
+
+# Ejecutar Agente 1
+agente1 = AgenteNormalizador(df_original, n_muestra=N_MUESTRA_DATASET)
+dataset_limpio = agente1.ejecutar()
