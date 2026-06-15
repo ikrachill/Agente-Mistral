@@ -314,3 +314,46 @@ class AgenteComparador:
 # Ejecutar Agente 2
 agente2 = AgenteComparador(X_train, X_test, y_train, y_test, X_train_pad, X_test_pad)
 mejor_modelo, mejores_metricas = agente2.comparar_y_seleccionar()
+
+"""BLOQUE 8: CREAR CORPUS PARA RAG"""
+
+print("\n" + "="*50)
+print("📚 CREANDO CORPUS PARA RAG")
+print("="*50)
+
+# Crear corpus
+corpus = []
+for i, row in dataset_limpio.head(N_CORPUS_RAG).iterrows():
+    documento = f"Puntuación: {row['Score']} | Sentimiento: {'POSITIVO' if row['Sentiment']==1 else 'NEGATIVO'} | Reseña: {row['CleanedReview'][:300]}"
+    corpus.append(documento)
+
+# Cargar modelo de embeddings
+modelo_embeddings = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Generar embeddings
+embeddings_list = []
+for doc in corpus:
+    emb = modelo_embeddings.encode(doc)
+    embeddings_list.append(emb.tolist())
+
+# Configurar ChromaDB
+client = chromadb.Client()
+try:
+    client.delete_collection("amazon_reviews_rag")
+except:
+    pass
+
+collection = client.create_collection(name="amazon_reviews_rag")
+
+for i, (doc, emb) in enumerate(zip(corpus, embeddings_list)):
+    collection.add(documents=[doc], embeddings=[emb], ids=[str(i)])
+
+# Crear función de recuperación
+def recuperar_contexto(pregunta, k=3):
+    pregunta_emb = modelo_embeddings.encode(pregunta)
+    resultados = collection.query(query_embeddings=[pregunta_emb.tolist()], n_results=k)
+    return resultados['documents'][0]
+
+print(f"✅ Corpus: {len(corpus)} documentos")
+print(f"✅ Embeddings: {len(embeddings_list)} vectores")
+print(f"✅ ChromaDB: {collection.count()} documentos almacenados")
