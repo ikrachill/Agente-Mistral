@@ -1,99 +1,168 @@
-# 🚀 Agente Mistral - Asistente Inteligente para Análisis de Ventas con RAG
+# Sistema Inteligente de Análisis de Reseñas con Arquitectura Multiagente
 
-<div align="center">
+## Resumen
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
-![LangChain](https://img.shields.io/badge/LangChain-1.3.1-green.svg)
-![Mistral AI](https://img.shields.io/badge/Mistral%20AI-Small%204-purple.svg)
-![RAG](https://img.shields.io/badge/RAG-Activado-orange.svg)
-![FAISS](https://img.shields.io/badge/FAISS-Vector%20Store-red.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+Este proyecto implementa una arquitectura multiagente para el análisis de sentimientos utilizando técnicas de Machine Learning, Deep Learning y Retrieval-Augmented Generation (RAG).
 
-**Un agente conversacional con búsqueda semántica (RAG) que analiza datos de ventas usando LangChain y Mistral AI**
-
-</div>
+El sistema procesa reseñas del dataset Amazon Fine Food Reviews, compara distintos modelos de clasificación y permite realizar consultas inteligentes sobre los datos mediante Mistral AI.
 
 ---
 
-## 📋 Tabla de Contenidos
+## Objetivos
 
-- [✨ Novedades (v2.0)](#-novedades-v20)
-- [🎯 Características Principales](#-características-principales)
-- [🔍 Sistema RAG Implementado](#-sistema-rag-implementado)
-- [🎥 Demo](#-demo)
-- [📦 Requisitos Previos](#-requisitos-previos)
-- [🔧 Instalación](#-instalación)
-- [🚀 Uso Rápido](#-uso-rápido)
-- [💬 Ejemplos de Preguntas](#-ejemplos-de-preguntas)
-- [🛠 Comandos Interactivos](#-comandos-interactivos)
-- [📊 Estructura del Proyecto](#-estructura-del-proyecto)
-- [🔐 Configuración de API Key](#-configuración-de-api-key)
-- [🐛 Solución de Problemas](#-solución-de-problemas)
-- [📈 Comparativa de Versiones](#-comparativa-de-versiones)
-- [🤝 Contribuciones](#-contribuciones)
-- [📄 Licencia](#-licencia)
+* Limpiar y preparar datos textuales para su análisis.
+* Entrenar y evaluar múltiples modelos de clasificación.
+* Seleccionar automáticamente el modelo con mejor desempeño.
+* Implementar un sistema RAG para consultas en lenguaje natural.
+* Generar respuestas basadas en evidencia recuperada del corpus.
 
 ---
 
-## ✨ Novedades (v2.0)
+## Componentes del Sistema
 
-### 🎉 Sistema RAG Implementado
+### Agente Normalizador
 
-| Característica | Descripción |
-|----------------|-------------|
-| 🔍 **Búsqueda Semántica** | Encuentra documentos relevantes usando embeddings multilingües |
-| 🗂️ **Vector Store FAISS** | Indexación eficiente de 2,823+ documentos |
-| 🌍 **Embeddings Multilingües** | Modelo `paraphrase-multilingual-MiniLM-L12-v2` con soporte español |
-| 🎛️ **Control Dinámico** | Activa/desactiva RAG con comandos (`rag_on` / `rag_off`) |
-| 📊 **Contexto Enriquecido** | Las preguntas se combinan con documentos semánticamente similares |
-| ⚡ **Rendimiento Optimizado** | Búsqueda rápida con índices FAISS |
+Encargado del preprocesamiento de datos.
+
+Funciones principales:
+
+* Eliminación de duplicados.
+* Tratamiento de valores faltantes.
+* Limpieza y normalización de texto.
+* Construcción del dataset final.
+* Balanceo de clases.
+
+### Agente Comparador
+
+Responsable de entrenar y evaluar diferentes algoritmos de clasificación.
+
+Modelos evaluados:
+
+* Regresión Logística
+* LSTM
+* DistilBERT
+
+Métricas utilizadas:
+
+* Accuracy
+* Precision
+* Recall
+* F1-Score
+
+El agente identifica automáticamente el modelo con mejor rendimiento.
+
+### Agente Comunicador
+
+Permite interactuar con el sistema mediante preguntas en lenguaje natural.
+
+Utiliza:
+
+* Embeddings semánticos
+* ChromaDB
+* RAG
+* Mistral AI
+
+Sus funciones incluyen:
+
+* Consultas sobre el dataset.
+* Resúmenes automáticos.
+* Generación de reportes.
+* Respuestas contextualizadas.
 
 ---
 
-## 🎯 Características Principales
+## Flujo de Trabajo
 
-| Característica | v1.0 | v2.0 (Actual) |
-|----------------|------|----------------|
-| 🤖 **Agente LangChain** | ✅ | ✅ |
-| 📊 **Limpieza Automática** | ✅ | ✅ |
-| 🔍 **Fuzzy Matching** | ✅ | ✅ |
-| 💰 **Cálculos Exactos** | ✅ | ✅ |
-| 🌍 **Español 100%** | ✅ | ✅ |
-| 🔎 **Búsqueda Semántica (RAG)** | ❌ | ✅ |
-| 🗂️ **Vector Store FAISS** | ❌ | ✅ |
-| 🎛️ **Control RAG Dinámico** | ❌ | ✅ |
-| 📈 **Contexto Enriquecido** | ❌ | ✅ |
-| 🚀 **Mayor Precisión** | Buena | **Excelente** |
+```text
+Dataset Amazon Reviews
+          │
+          ▼
+Preprocesamiento de Datos
+          │
+          ▼
+Entrenamiento y Evaluación
+          │
+          ▼
+Selección del Mejor Modelo
+          │
+          ▼
+Creación del Corpus RAG
+          │
+          ▼
+Embeddings + ChromaDB
+          │
+          ▼
+Consultas Inteligentes con Mistral
+```
 
 ---
 
-## 🔍 Sistema RAG Implementado
+## Herramientas y Librerías
 
-### ¿Cómo funciona el RAG en este proyecto?
-=======================================================
-   🤖 SALES BOT - LANGCHAIN + MISTRAL + RAG
-=======================================================
+* Python
+* Pandas
+* NumPy
+* Scikit-Learn
+* TensorFlow
+* Keras
+* Transformers
+* DistilBERT
+* Sentence Transformers
+* ChromaDB
+* Mistral AI
+* Matplotlib
+* Seaborn
 
-👤 Tú: info
+---
 
-📊 Información del dataset:
-   • Filas: 2,823
-   • Columnas: 26
-   • 💰 Ventas totales: $10,032,628.85
-   • 🌎 Países: 19
-   • 👥 Clientes: 91
-   • 🔍 RAG: ACTIVADO
+## Dataset
 
-👤 Tú: ¿Cuál es el país con más ventas?
+**Amazon Fine Food Reviews**
 
-🤖 Bot: 🔍 [RAG] Procesando consulta...
-🔍 Buscando documentos relevantes...
-📄 Encontrados 3 documentos con relevancia >0.65
+Características principales:
 
-Analizando datos con el DataFrame 'df':
+* Más de 568.000 reseñas.
+* Opiniones reales de clientes.
+* Calificaciones de productos de 1 a 5 estrellas.
+* Datos textuales adecuados para análisis de sentimientos.
 
-El país con más ventas es **USA** con un total de $3,456,789.23
+---
 
-Código utilizado:
+## Requisitos
+
+Instalar las dependencias necesarias:
+
+```bash
+pip install pandas numpy matplotlib seaborn
+pip install scikit-learn tensorflow keras
+pip install transformers torch
+pip install sentence-transformers chromadb
+pip install langchain-mistralai
+```
+
+---
+
+## Configuración
+
+Antes de ejecutar el proyecto se deben configurar las credenciales:
+
 ```python
-top_pais = df.groupby('country')['sales'].sum().sort_values(ascending=False).head(1)
+KAGGLE_USERNAME
+KAGGLE_KEY
+MISTRAL_API_KEY
+```
+
+---
+
+## Resultados
+
+El sistema permite:
+
+* Procesar automáticamente miles de reseñas.
+* Clasificar sentimientos positivos y negativos.
+* Comparar distintos enfoques de inteligencia artificial.
+* Recuperar información relevante mediante RAG.
+* Responder preguntas sobre el contenido del dataset.
+* Generar reportes automáticos del análisis realizado.
+
+---
